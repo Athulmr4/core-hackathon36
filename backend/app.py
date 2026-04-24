@@ -1,7 +1,11 @@
 from flask import Flask, request, jsonify
-from risk_engine import calculate_risk
+from risk_engine import analyze_transaction
 
 app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Fraud Shield API Running"
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
@@ -11,8 +15,7 @@ def analyze():
     receiver = data.get("receiver")
     amount = data.get("amount")
 
-    result = calculate_risk(sender, receiver, amount)
-
+    result = analyze_transaction(sender, receiver, amount, [])
     return jsonify(result)
 
 if __name__ == '__main__':

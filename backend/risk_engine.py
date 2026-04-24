@@ -1,3 +1,4 @@
+from datetime import datetime
 def analyze_transaction(sender_id, receiver_id, amount, transaction_history):
     score = 0
     reasons = []
@@ -41,3 +42,14 @@ def analyze_transaction(sender_id, receiver_id, amount, transaction_history):
         "risk_score": score,
         "reasons": reasons if reasons else ["No suspicious activity detected"]
     }
+
+    
+def is_new_receiver(sender_id, receiver_id, transaction_history):
+    for txn in transaction_history:
+        if txn["sender"] == sender_id and txn["receiver"] == receiver_id:
+            return False
+    return True
+
+def is_night_time():
+    hour = datetime.now().hour
+    return hour < 6 or hour > 22
