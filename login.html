@@ -151,11 +151,9 @@
   <script>
     const API = 'http://localhost:5001/api';
 
-    // If already logged in → go straight to dashboard
-    try {
-      const s = JSON.parse(localStorage.getItem('fraudshield_session'));
-      if (s && s.id) window.location.href = 'dashboard.html';
-    } catch(e) {}
+    // Clean up any stale keys from old code versions
+    localStorage.removeItem('fraudshield_user');
+    localStorage.removeItem('fraudshield_users');
 
     // Tab switcher
     function switchTab(tab) {

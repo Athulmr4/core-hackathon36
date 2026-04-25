@@ -439,10 +439,15 @@
       let user = null;
       try { user = JSON.parse(localStorage.getItem(SESSION_KEY)); } catch(e) {}
       if (!user || !user.id) {
-        // Redirect to login if no valid session
-        window.location.href = 'login.html';
+        // Only redirect ONCE to prevent infinite loop
+        if (!sessionStorage.getItem('_fs_tried_login')) {
+          sessionStorage.setItem('_fs_tried_login', '1');
+          window.location.href = 'login.html';
+        }
         return;
       }
+      // Clear the loop guard on successful load
+      sessionStorage.removeItem('_fs_tried_login');
       console.log('Dashboard: user =', user.fullName, '| id =', user.id);
 
       // Populate sidebar name/avatar
