@@ -3,21 +3,52 @@
    Shared utilities: sidebar, modals, toasts, data helpers
    ==================================================== */
 
-// ---- Global Session Guard ----
+// ---- Global Config & API Discovery ----
+window.FS_CONFIG = {
+  API_BASE: (location.protocol === 'file:') ? 'http://localhost:5001/api' : `http://${location.hostname}:5001/api`
+};
+
+// ---- Global Session Guard (Disabled - Auto Guest Login) ----
 (function() {
+  const SESSION_KEY = 'fraudshield_session';
+  let sessionStr = localStorage.getItem(SESSION_KEY);
+  let session = null;
+  try { session = JSON.parse(sessionStr); } catch(e) {}
+  
+  const guestUser = {
+    id: 1, 
+    fullName: "Athul M R", 
+    username: "dhanu@123", 
+    safetyScore: 85, 
+    xp: 450
+  };
+
+  // Direct Open: If no session OR if it's the wrong user (e.g. leftovers), set to guest
+  if (!session || (session.id !== 1 && !session.stayLoggedIn)) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(guestUser));
+    console.log('Session Guard: Enforcing Auto Guest Session (Athul M R)');
+  }
+
+  // Direct Open: Redirect from landing/root ONLY
   const path = window.location.pathname;
-  if (!path.endsWith('login.html') && !path.endsWith('index.html') && path !== '/' && !path.endsWith('/core-hackathon36/')) {
-    const user = localStorage.getItem('fraudshield_user');
-    if (!user) {
-      window.location.href = 'login.html';
-    }
+  const filenames = ['index.html', '', '/'];
+  const isLanding = filenames.some(f => path.endsWith(f)) && 
+                    !path.includes('.html') || path.endsWith('index.html');
+  
+  // Refined check: must be the root or specifically index.html
+  const isRoot = path === '/' || path.endsWith('/vcethackathon/') || path.endsWith('/core-hackathon36/');
+  const shouldRedirect = isRoot || path.endsWith('index.html');
+
+  if (shouldRedirect && !path.includes('dashboard.html')) {
+    window.location.href = 'dashboard.html';
   }
 })();
 
 // ---- Logout Handler ----
 window.logout = function() {
-  localStorage.removeItem('fraudshield_user');
-  window.location.href = 'index.html';
+  localStorage.removeItem('fraudshield_session');
+  sessionStorage.removeItem('_fs_tried_login'); // Clear loop guard
+  window.location.href = 'login.html';
 };
 
 // ---- Sidebar Toggle ----
@@ -171,7 +202,7 @@ async function createBackendAlert({ type, title, message }) {
   try {
     const session = typeof getSession === 'function' ? getSession() : JSON.parse(localStorage.getItem('fraudshield_session'));
     if (!session) return;
-    await fetch('http://localhost:5001/api/alerts', {
+    await fetch(`${window.FS_CONFIG.API_BASE}/alerts`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: session.id, type, title, message })
@@ -195,8 +226,8 @@ function timeAgo(date) {
 const Store = {
   _getUserPrefix: () => {
     try {
-      const u = JSON.parse(localStorage.getItem('fraudshield_user'));
-      return u && u.email ? u.email + '_' : '';
+      const u = JSON.parse(localStorage.getItem('fraudshield_session'));
+      return u && u.username ? u.username + '_' : '';
     } catch { return ''; }
   },
   get: (key, def = null) => { try { return JSON.parse(localStorage.getItem('fraudshield_' + Store._getUserPrefix() + key)) ?? def; } catch { return def; } },

@@ -167,16 +167,19 @@
   display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem;
 }
 .summary-tile {
-  padding: 1.25rem 1.5rem; border-radius: var(--r-lg);
+  padding: 0.875rem 1.25rem; border-radius: var(--r-lg);
   background: var(--bg-glass); border: 1px solid var(--border);
-  display: flex; align-items: center; gap: 1rem;
+  display: flex; align-items: center; gap: 0.875rem;
 }
 .summary-tile-icon {
   width: 42px; height: 42px; border-radius: var(--r-md);
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .summary-tile-icon .icon { width: 20px; height: 20px; }
-.stile-count { font-family: var(--fhead); font-size: 2rem; font-weight: 800; line-height: 1; }
+.topbar-title { display: flex; flex-direction: column; justify-content: center; }
+.topbar-title h1 { font-family: var(--fhead); font-size: 1.3rem; font-weight: 800; color: #fff; line-height: 1.1; }
+.topbar-title span, .topbar-title p { font-size: 0.8rem; color: var(--t3); font-weight: 600; margin: 0; padding: 0; }
+.stile-count { font-family: var(--fhead); font-size: 1.7rem; font-weight: 800; line-height: 1; }
 .stile-label { font-size: 0.72rem; color: var(--t3); font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
 
 .filter-tabs {
@@ -658,6 +661,7 @@
 }
 .section-sub { font-size: 1rem; color: var(--t2); line-height: 1.65; margin-top: 0.875rem; max-width: 540px; }
 
+
 .features-section { padding: 6rem 2.5rem; max-width: 1200px; margin: 0 auto; width: 100%; }
 .features-grid  { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; margin-top: 3rem; }
 .feature-card {
@@ -862,24 +866,24 @@
 
 /* Alert row simple refinement */
 .alert-row {
-  display: flex !important; align-items: flex-start !important; gap: 14px !important;
-  padding: 12px 14px !important; border-radius: 16px !important;
+  display: flex !important; align-items: flex-start !important; gap: 12px !important;
+  padding: 10px 12px !important; border-radius: 14px !important;
   background: rgba(255, 255, 255, 0.02) !important;
-  border: 1px solid transparent !important; margin-bottom: 8px !important;
+  border: 1px solid transparent !important; margin-bottom: 6px !important;
   transition: 0.2s;
 }
-.alert-row:hover { background: rgba(255, 255, 255, 0.04); border-color: rgba(255, 255, 255, 0.08); }
-.alert-row-icon { width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.alert-row:hover { background: rgba(255, 255, 255, 0.04); border-color: rgba(255,255,255, 0.08); }
+.alert-row-icon { width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
 .alert-row-info { flex: 1; }
-.alert-row-title { font-size: 0.88rem; font-weight: 700; color: #fff; margin-bottom: 2px; }
-.alert-row-desc { font-size: 0.74rem; color: var(--t3); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.alert-row-time { font-size: 0.65rem; color: var(--t3); margin-top: 6px; font-weight: 600; }
+.alert-row-title { font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 1px; }
+.alert-row-desc { font-size: 0.72rem; color: var(--t3); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.alert-row-time { font-size: 0.62rem; color: var(--t3); margin-top: 4px; font-weight: 600; }
 
-/* Status Colors */
+/* Status Colors & AI Badges */
 .st-safe { color: var(--emerald-lt); }
 .st-warn { color: var(--amber-lt); }
 .st-danger { color: var(--crimson-lt); }
 
-.ai-high { background: rgba(220,38,38,0.12); color: var(--crimson-lt); }
-.ai-med  { background: rgba(245, 158, 11, 0.12); color: var(--amber-lt); }
-.ai-low  { background: rgba(16, 185, 129, 0.12); color: var(--emerald-lt); }
+.ai-high, .ai-critical { background: rgba(220,38,38,0.12); color: var(--crimson-lt); }
+.ai-med, .ai-warning   { background: rgba(245, 158, 11, 0.12); color: var(--amber-lt); }
+.ai-low, .ai-info, .ai-safe { background: rgba(16, 185, 129, 0.12); color: var(--emerald-lt); }

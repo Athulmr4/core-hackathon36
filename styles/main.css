@@ -92,7 +92,14 @@ body {
 .btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: var(--border-hover); }
 
 /* Animation Utility */
-.anim-up { opacity: 0; transform: translateY(30px); animation: fadeInUp 0.8s forwards; }
+.anim-up { 
+  opacity: 0; 
+  transform: translateY(10px); 
+  animation: fadeInUp 0.4s ease-out forwards; 
+}
+.d1 { animation-delay: 0.1s; }
+.d2 { animation-delay: 0.15s; }
+.d3 { animation-delay: 0.2s; }
 @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 
 /* Global Toast - Premium Minimalist */
@@ -128,7 +135,7 @@ body {
 }
 
 .main-content { margin-left: 260px; flex: 1; min-width: 0; position: relative; }
-.page-body { padding: 2.5rem; max-width: 1400px; margin: 0 auto; }
+.page-body { padding: 1.25rem 2rem 2rem; max-width: 1400px; margin: 0 auto; }
 
 /* Sidebar Components */
 .sidebar-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }

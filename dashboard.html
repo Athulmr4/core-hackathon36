@@ -431,7 +431,7 @@
   <script src="js/models.js"></script>
   <script src="js/fraud-engine.js"></script>
   <script src="js/auth.js"></script>
-  <script src="js/dashboard.js?v=3.2"></script>
+  <script src="js/dashboard.js?v=3.3"></script>
   <script>
     // Bootstrap: runs AFTER all scripts are parsed — no DOMContentLoaded race
     (function initDashboard() {
@@ -439,62 +439,24 @@
       let user = null;
       try { user = JSON.parse(localStorage.getItem(SESSION_KEY)); } catch(e) {}
       if (!user || !user.id) {
-        console.warn('Dashboard bootstrap: no session found.');
+        console.warn('Dashboard: Session not ready, using guest fallback');
         return;
       }
-      console.log('Dashboard bootstrap: user', user.fullName, 'id', user.id);
-      const API = 'http://localhost:5001/api';
+      // Clear the loop guard on successful load
+      sessionStorage.removeItem('_fs_tried_login');
+      console.log('Dashboard: user =', user.fullName, '| id =', user.id);
 
-      function safeEl(id) { return document.getElementById(id); }
+      // Populate sidebar name/avatar
+      const nameEl   = document.querySelector('.user-name');
+      const avatarEl = document.querySelector('.user-avatar');
+      if (nameEl)   nameEl.textContent   = user.fullName || 'User';
+      if (avatarEl) avatarEl.textContent = (user.fullName||'U').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
 
-      function updateScore(score) {
-        const s = Math.round(score);
-        const el = safeEl('safetyScore');
-        if (el) el.innerHTML = s + '<span class="score-max">/100</span>';
-        const rl = safeEl('ringScorelabel');
-        if (rl) rl.textContent = s + '%';
-        const circle = safeEl('scoreRingCircle');
-        if (circle) {
-          const c = 2 * Math.PI * 56;
-          circle.style.transition = 'stroke-dashoffset 1.4s ease';
-          circle.setAttribute('stroke-dashoffset', c - (c * s / 100));
-        }
-        const lv = safeEl('safetyLevel');
-        const tp = safeEl('safetyTip');
-        if (lv) {
-          if (s >= 80) {
-            lv.innerHTML = '<span style="color:var(--emerald-lt)">Ironclad Security</span>';
-            if (tp) tp.textContent = 'Your account is extremely secure. Keep it up!';
-          } else if (s >= 40) {
-            lv.innerHTML = '<span style="color:var(--amber-lt)">Moderate Protection</span>';
-            if (tp) tp.textContent = 'Complete more lessons to improve your score.';
-          } else {
-            lv.innerHTML = '<span style="color:var(--crimson-lt)">High Risk Profile</span>';
-            if (tp) tp.textContent = 'Take immediate action to secure your account.';
-          }
-        }
-      }
-
-      function loadStats() {
-        fetch(API + '/user/stats?user_id=' + user.id + '&cb=' + Date.now())
-          .then(r => r.json())
-          .then(d => {
-            updateScore(d.safetyScore || 0);
-            if (typeof animateCount === 'function') {
-              animateCount(safeEl('statSavedVal'),   d.moneySaved    || 0);
-              animateCount(safeEl('statTxnVal'),     d.txnsProtected || 0);
-              animateCount(safeEl('statBlockedVal'), d.scannedTotal  || 0);
-            }
-            const badge = safeEl('alertBadge');
-            if (badge) { badge.textContent = d.scannedTotal || 0; badge.style.display = (d.scannedTotal > 0) ? 'flex' : 'none'; }
-          })
-          .catch(e => { console.error('Stats load failed:', e); });
-      }
-
-      // Run immediately (DOM is ready since this is at bottom of body)
-      loadStats();
-      // Also re-run every 30 s for live monitoring
-      setInterval(loadStats, 30000);
+      // Load all data
+      fetchStats(user.id);
+      fetchActivity(user.id);
+      fetchAlertsList(user.id);
+      startAutoRefresh(user.id);
     })();
   </script>
 </body>

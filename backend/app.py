@@ -3,7 +3,7 @@ FraudShield – FastAPI Backend (High-Performance)
 Async, CORS-ready, live-monitoring capable
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
@@ -134,7 +134,9 @@ def register(data: RegisterData):
 
 @app.post("/api/auth/login")
 def login(data: LoginData):
+    print(f"🔑 LOGIN attempt: username='{data.username}' password='{data.password}'")
     pw_hash = hashlib.sha256(data.password.encode()).hexdigest()
+    print(f"🔑 Computed hash: {pw_hash}")
     conn = get_db()
     user = conn.execute(
         "SELECT * FROM users WHERE username=? AND password_hash=?",
@@ -353,8 +355,24 @@ def analyze_url(data: UrlData):
         "confidence": 0.982
     }
 
+# ── CORS & Private Network Fix ─────────────────────────────────────────
+@app.middleware("http")
+async def add_cors_and_private_network_header(request: Request, call_next):
+    if request.method == "OPTIONS":
+        response = Response()
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        response.headers["Access-Control-Allow-Private-Network"] = "true"
+        return response
+    
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Private-Network"] = "true"
+    return response
+
 # ── Launch ─────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn
     print("🚀 FraudShield FastAPI v3.0 — starting on port 5001")
-    uvicorn.run("app:app", host="127.0.0.1", port=5001, reload=True, log_level="info")
+    uvicorn.run("app:app", host="0.0.0.0", port=5001, reload=True, log_level="info")

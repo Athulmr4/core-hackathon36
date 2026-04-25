@@ -1,10 +1,8 @@
 /* ====================================================
    FraudShield – alerts.js (API Integration)
-   Fetches risk-related notifications from the backend
    ==================================================== */
 
-const API_BASE = 'http://localhost:5001/api';
-const currentUser = (typeof getSession === 'function') ? getSession() : JSON.parse(localStorage.getItem('fraudshield_session'));
+const ALERTS_API = 'http://localhost:5001/api';
 
 const ICON_SVG = {
   critical: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 6.5v5.5C3 17.5 7 22 12 23c5-1 9-5.5 9-11V6.5L12 2z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
@@ -13,17 +11,18 @@ const ICON_SVG = {
 
 let allRiskAlerts = [];
 
-async function fetchAlerts() {
-  if (!currentUser) return;
+async function fetchAlerts(userId) {
   try {
-    const res = await fetch(`${API_BASE}/alerts?user_id=${currentUser.id}`);
+    const res = await fetch(`${ALERTS_API}/alerts?user_id=${userId}&cb=${Date.now()}`);
+    if (!res.ok) throw new Error('Alerts API error: ' + res.status);
     const alerts = await res.json();
-    // Filter to only show risk-relevant alerts (Critical/Warning)
     allRiskAlerts = alerts.filter(a => a.type === 'critical' || a.type === 'warning');
     renderAlerts(allRiskAlerts);
     updateSummary(allRiskAlerts);
   } catch (err) {
     console.error('Alerts fetch failed:', err);
+    const c = document.getElementById('alertsContainer');
+    if (c) c.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--crimson-lt)">Could not load alerts — check backend.</div>`;
   }
 }
 
@@ -80,9 +79,12 @@ function renderAlerts(alerts) {
 function updateSummary(alerts) {
   const el = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
   el('cnt-critical', alerts.filter(a => a.type === 'critical').length);
-  el('cnt-warning', alerts.filter(a => a.type === 'warning').length);
+  el('cnt-warning',  alerts.filter(a => a.type === 'warning').length);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  if (currentUser) fetchAlerts();
-});
+// filterAlerts called from HTML buttons — uses allRiskAlerts already loaded
+function filterAlerts(type, btn) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderAlerts(type === 'all' ? allRiskAlerts : allRiskAlerts.filter(a => a.type === type));
+}

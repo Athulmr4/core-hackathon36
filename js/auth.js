@@ -52,7 +52,7 @@ function getSession() {
 function requireAuth() {
   const session = getSession();
   if (!session) {
-    window.location.href = 'login.html';
+    console.warn('Auth: No session found, but redirect disabled');
     return null;
   }
   return session;
@@ -99,9 +99,11 @@ function addLogoutButton() {
 document.addEventListener('DOMContentLoaded', () => {
   const path = window.location.pathname;
   const isLoginPage = path.includes('login.html');
-  const isIndexPage = path.endsWith('/') || path.endsWith('index.html');
+  const isIndexPage = path.endsWith('/') || path.endsWith('index.html') || path.endsWith('/core-hackathon36/');
+  
   if (isLoginPage || isIndexPage) return;
-  const session = requireAuth();
+  
+  const session = getSession();
   if (session) {
     populateSidebarUser();
     addLogoutButton();
