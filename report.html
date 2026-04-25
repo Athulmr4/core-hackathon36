@@ -49,14 +49,26 @@
       Report Fraud
     </a>
   </nav>
-  <div class="sidebar-footer">
-    <div class="sidebar-user">
-      <div class="user-avatar" id="sidebarAvatar">AM</div>
-      <div>
-        <div class="user-name" id="sidebarName">Athul M R</div>
-        <div class="user-status"><span class="status-dot"></span> Protected</div>
+        <div class="sidebar-footer">
+        <div class="sidebar-user" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="user-avatar" id="sidebarAvatar">AM</div>
+            <div>
+              <div class="user-name" id="sidebarName">Athul M R</div>
+              <div class="user-status">
+                <span class="status-dot"></span> Protected
+              </div>
+            </div>
+          </div>
+          <button onclick="logout()" style="background: none; border: none; color: var(--danger); cursor: pointer; padding: 8px;" title="Log Out">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </button>
+        </div>
       </div>
-    </div>
   </div>
 </aside>
 

@@ -5,83 +5,43 @@
    try to read the session.
    ==================================================== */
 
-const API_BASE = 'http://localhost:5001/api';
+// ---- Session Check ----
+const currentUser = JSON.parse(localStorage.getItem('fraudshield_user'));
+if (!currentUser) {
+  window.location.href = 'login.html';
+}
 
-// ── SVG icon shortcuts ──────────────────────────────────────────────
-const SVG = {
+function updateUserInfo() {
+  if (!currentUser) return;
+  const nameEl = document.querySelector('.user-name');
+  const avatarEl = document.querySelector('.user-avatar');
+  if (nameEl) nameEl.textContent = currentUser.name || 'User';
+  if (avatarEl) {
+    avatarEl.textContent = currentUser.initials || currentUser.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
+  }
+
+}
+
+document.addEventListener('DOMContentLoaded', updateUserInfo);
+
+
+
+
+
+
+
+
+
+
+const SVG_ICONS = {
   shieldAlert: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 6.5v5.5C3 17.5 7 22 12 23c5-1 9-5.5 9-11V6.5L12 2z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
-  alertTri:   `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
-  check:      `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>`,
-  warn:       `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
-  block:      `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 6.5v5.5C3 17.5 7 22 12 23c5-1 9-5.5 9-11V6.5L12 2z"/></svg>`,
+  alertTriangle: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  lock: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>`,
+  checkCircle: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>`,
+  check: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>`,
+  shield: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 6.5v5.5C3 17.5 7 22 12 23c5-1 9-5.5 9-11V6.5L12 2z"/></svg>`,
+  warn: `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
 };
-
-// ── Helpers ─────────────────────────────────────────────────────────
-function el(id) { return document.getElementById(id); }
-
-function setHTML(id, html) {
-  const e = el(id);
-  if (e) e.innerHTML = html;
-}
-
-function setText(id, text) {
-  const e = el(id);
-  if (e) e.textContent = text;
-}
-
-// ── Safety Score Ring ─────────────────────────────────────────────
-function updateScoreUI(score) {
-  const s = Math.round(score);
-
-  // Number & ring
-  const scoreEl = el('safetyScore');
-  if (scoreEl) scoreEl.innerHTML = s + '<span class="score-max">/100</span>';
-
-  const ringLabel = el('ringScorelabel');
-  if (ringLabel) ringLabel.textContent = s + '%';
-
-  const circle = el('scoreRingCircle');
-  if (circle) {
-    const circ = 2 * Math.PI * 56;
-    circle.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)';
-    circle.setAttribute('stroke-dashoffset', circ - (circ * s / 100));
-  }
-
-  // Text labels
-  const level = el('safetyLevel');
-  const tip   = el('safetyTip');
-  if (level) {
-    if (s >= 80) {
-      level.innerHTML = `<span style="color:var(--emerald-lt)">Ironclad Security</span>`;
-      if (tip) tip.textContent = 'Your account is extremely secure. Keep it up!';
-    } else if (s >= 40) {
-      level.innerHTML = `<span style="color:var(--amber-lt)">Moderate Protection</span>`;
-      if (tip) tip.textContent = 'Complete more lessons to improve your score.';
-    } else {
-      level.innerHTML = `<span style="color:var(--crimson-lt)">High Risk Profile</span>`;
-      if (tip) tip.textContent = 'Take immediate action to secure your account.';
-    }
-  }
-}
-
-// ── Fetch & render stats ─────────────────────────────────────────
-async function fetchStats(userId) {
-  try {
-    const res = await fetch(`${API_BASE}/user/stats?user_id=${userId}&cb=${Date.now()}`);
-    if (!res.ok) throw new Error(res.status);
-    const d = await res.json();
-
-    // Animate counters
-    if (typeof animateCount === 'function') {
-      animateCount(el('statSavedVal'),    d.moneySaved    || 0);
-      animateCount(el('statTxnVal'),      d.txnsProtected || 0);
-      animateCount(el('statBlockedVal'),  d.scannedTotal  || 0);
-    } else {
-      // Fallback plain set
-      setText('statSavedVal',   d.moneySaved    || 0);
-      setText('statTxnVal',     d.txnsProtected || 0);
-      setText('statBlockedVal', d.scannedTotal  || 0);
-    }
 
     updateScoreUI(d.safetyScore || 0);
 
