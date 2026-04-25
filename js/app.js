@@ -14,6 +14,12 @@
   }
 })();
 
+// ---- Logout Handler ----
+window.logout = function() {
+  localStorage.removeItem('fraudshield_user');
+  window.location.href = 'index.html';
+};
+
 // ---- Sidebar Toggle ----
 function toggleSidebar() {
   const s = document.getElementById('sidebar');
@@ -174,8 +180,14 @@ function timeAgo(date) {
 
 // ---- Local Storage ----
 const Store = {
-  get: (key, def = null) => { try { return JSON.parse(localStorage.getItem('fraudshield_' + key)) ?? def; } catch { return def; } },
-  set: (key, val) => { try { localStorage.setItem('fraudshield_' + key, JSON.stringify(val)); } catch {} },
+  _getUserPrefix: () => {
+    try {
+      const u = JSON.parse(localStorage.getItem('fraudshield_user'));
+      return u && u.email ? u.email + '_' : '';
+    } catch { return ''; }
+  },
+  get: (key, def = null) => { try { return JSON.parse(localStorage.getItem('fraudshield_' + Store._getUserPrefix() + key)) ?? def; } catch { return def; } },
+  set: (key, val) => { try { localStorage.setItem('fraudshield_' + Store._getUserPrefix() + key, JSON.stringify(val)); } catch {} },
   push: (key, item, max = 50) => {
     const arr = Store.get(key, []);
     arr.unshift(item);

@@ -22,35 +22,13 @@ function updateUserInfo() {
 document.addEventListener('DOMContentLoaded', updateUserInfo);
 
 
-const TRANSACTIONS = [
-  { id:'T001', name:'Amazon India',    upi:'amazon@pay',       amount:1299,  type:'debit',  status:'safe',    time: new Date(Date.now()-3600000),   init:'AM', color:'#f97316' },
-  { id:'T002', name:'Swiggy',          upi:'swiggy@sbi',       amount:380,   type:'debit',  status:'safe',    time: new Date(Date.now()-7200000),   init:'SW', color:'#ef4444' },
-  { id:'T003', name:'Priya Sharma',    upi:'priya@paytm',      amount:5001,  type:'debit',  status:'warn',    time: new Date(Date.now()-10800000),  init:'PS', color:'#7c3aed' },
-  { id:'T004', name:'Salary Credit',   upi:'hdfc@corp',        amount:45001, type:'credit', status:'safe',    time: new Date(Date.now()-86400000),  init:'HD', color:'#059669' },
-  { id:'T005', name:'Fake Lottery Co', upi:'prize.winner@pay', amount:15001, type:'debit',  status:'blocked', time: new Date(Date.now()-172800000), init:'FL', color:'#dc2626' },
-  { id:'T006', name:'Netflix India',   upi:'netflix@upi',      amount:649,   type:'debit',  status:'safe',    time: new Date(Date.now()-259200000), init:'NF', color:'#7c3aed' },
-];
 
-const ALERTS_DATA = [
-  { id:'A001', level:'critical', iconType:'shieldAlert', title:'Phishing SMS Detected',        desc:'A link via SMS matches phishing patterns for SBI bank impersonation.', time: new Date(Date.now()-1800000) },
-  { id:'A002', level:'warning',  iconType:'alertTriangle', title:'Large Transaction Paused',   desc:'A payment of ₹25,000 to "prize.claim@pay" was automatically paused.', time: new Date(Date.now()-3600000) },
-  { id:'A003', level:'warning',  iconType:'lock', title:'New Device Login Detected',           desc:'Your account was accessed from a new device in Mumbai.', time: new Date(Date.now()-7200000) },
-];
 
-const NOTIFICATIONS_DATA = [
-  { iconType:'shieldAlert', level:'critical', title:'Critical Alert',        body:'Phishing SMS detected targeting your bank!', time:'2 min ago' },
-  { iconType:'alertTriangle', level:'warning', title:'Large Transaction',    body:'A ₹25,000 transfer was paused for review.', time:'1 hr ago' },
-  { iconType:'checkCircle',   level:'success', title:'Safety Tip',          body:'Your Safety Score improved after completing a lesson.', time:'3 hr ago' },
-];
 
-const RADAR_DATA = [
-  { label:'Phishing Risk',      pct: 22, color:'#dc2626' },
-  { label:'UPI Fraud Risk',     pct: 15, color:'#f97316' },
-  { label:'SIM Swap Risk',      pct: 8,  color:'#d97706' },
-  { label:'Social Eng. Risk',   pct: 30, color:'#7c3aed' },
-  { label:'Account Takeover',   pct: 12, color:'#0284c7' },
-  { label:'OTP Exposure Risk',  pct: 18, color:'#0d9488' },
-];
+
+
+
+
 
 const SVG_ICONS = {
   shieldAlert: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 6.5v5.5C3 17.5 7 22 12 23c5-1 9-5.5 9-11V6.5L12 2z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
