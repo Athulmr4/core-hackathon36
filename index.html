@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FraudShield – Your AI Security Guardian</title>
+  <meta name="description" content="AI-powered real-time protection for your digital transactions and identity.">
+  <link rel="stylesheet" href="styles/main.css">
+  <style>
+    /* Splashy Hero Enhancements */
+    .hero-section {
+      position: relative; padding: 120px 5% 80px;
+      min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; overflow: hidden;
+    }
+    
+    .hero-glow {
+      position: absolute; width: 1000px; height: 1000px;
+      background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, transparent 70%);
+      top: -200px; z-index: -1; animation: drift 20s infinite alternate;
+    }
+    @keyframes drift { from { transform: translate(-50px, -50px); } to { transform: translate(50px, 50px); } }
+
+    .nav-premium {
+      position: fixed; top: 0; left:0; right:0; height: 80px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 8%; z-index: 1000; transition: 0.3s;
+    }
+    .nav-scrolled { background: rgba(5, 8, 18, 0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+    
+    .logo-text { font-family: var(--fhead); font-weight: 800; font-size: 1.4rem; letter-spacing: -0.02em; color: #fff; }
+    .logo-dot { color: var(--violet); }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px; border-radius: 100px;
+      background: rgba(124, 58, 237, 0.1); border: 1px solid rgba(124, 58, 237, 0.2);
+      font-size: 0.75rem; font-weight: 700; color: var(--violet-lt);
+      margin-bottom: 2rem; letter-spacing: 0.05em; text-transform: uppercase;
+    }
+
+    .hero-h1 {
+      font-family: var(--fhead); font-size: clamp(2.5rem, 8vw, 4.5rem);
+      font-weight: 900; line-height: 1.1; margin-bottom: 1.5rem;
+      max-width: 900px; letter-spacing: -0.03em;
+    }
+    .hero-h1 span {
+      background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 1.125rem; color: var(--t2); line-height: 1.7;
+      max-width: 680px; margin-bottom: 2.5rem;
+    }
+
+    .hero-visual {
+      position: relative; margin-top: 4rem; width: 100%; max-width: 1080px;
+      padding: 2rem; background: rgba(255,255,255,0.02);
+      border-radius: 32px; border: 1px solid var(--border);
+      box-shadow: 0 40px 100px -20px rgba(0,0,0,0.8);
+      animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+
+    .preview-card {
+      background: rgba(13, 17, 34, 0.8); border-radius: 20px;
+      padding: 2rem; border: 1px solid var(--border); text-align: left;
+    }
+
+    /* Grid of Stats */
+    .hero-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;
+      margin-top: 4rem; width: 100%; max-width: 800px;
+    }
+    .stat-card { text-align: center; }
+    .stat-val { font-family: var(--fhead); font-size: 2.5rem; font-weight: 800; color: #fff; }
+    .stat-label { font-size: 0.875rem; color: var(--t3); font-weight: 600; text-transform: uppercase; }
+
+  </style>
+</head>
+<body>
+
+  <nav class="nav-premium" id="mainNav">
+    <div class="logo-text">FraudShield<span class="logo-dot">.</span></div>
+    <div style="display:flex; gap:1.5rem; align-items:center">
+      <a href="#features" style="color:var(--t2); text-decoration:none; font-size:0.9rem; font-weight:600">Features</a>
+      <a href="login.html" class="btn btn-secondary">Sign In</a>
+      <a href="login.html" class="btn btn-primary">Start Free</a>
+    </div>
+  </nav>
+
+  <section class="hero-section">
+    <div class="hero-glow"></div>
+    
+    <div class="hero-badge anim-up">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"/></svg>
+      Next-Gen Fraud Detection is Here
+    </div>
+
+    <h1 class="hero-h1 anim-up" style="animation-delay: 0.1s">
+      Your Digital Guardian<br/>Against <span>Fraud & Scams</span>
+    </h1>
+
+    <p class="hero-desc anim-up" style="animation-delay: 0.2s">
+      FraudShield detects suspicious transactions in real-time, warns you before you lose money, and teaches you to stay safe — in plain, simple language.
+    </p>
+
+    <div class="hero-ctas anim-up" style="animation-delay: 0.3s; display:flex; gap:1.25rem">
+      <a href="login.html" class="btn btn-primary" style="padding:16px 40px; font-size:1.05rem">Get Protected Now</a>
+      <a href="#how" class="btn btn-secondary" style="padding:16px 40px; font-size:1.05rem">Watch Demo</a>
+    </div>
+
+    <div class="hero-visual anim-up" style="animation-delay: 0.4s">
+       <div class="preview-card glass">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem">
+            <div style="display:flex; gap:8px">
+              <span style="width:12px;height:12px;border-radius:50%;background:#ff5f57"></span>
+              <span style="width:12px;height:12px;border-radius:50%;background:#ffbd2e"></span>
+              <span style="width:12px;height:12px;border-radius:50%;background:#28c940"></span>
+            </div>
+            <div style="font-size:0.75rem; font-weight:700; color:var(--t3); letter-spacing:0.1em">LIVE PROTECTION ACTIVE</div>
+          </div>
+          <div style="display:flex; gap:2rem; align-items:center">
+             <div style="width:120px; height:120px; border-radius:50%; border:8px solid #7c3aed; display:flex; align-items:center; justify-content:center; flex-shrink:0">
+                <span style="font-size:2.25rem; font-family:var(--fhead); font-weight:900">85</span>
+             </div>
+             <div>
+                <h3 style="font-family:var(--fhead); font-size:1.5rem; margin-bottom:0.5rem">Security Score</h3>
+                <p style="font-size:0.875rem; color:var(--t3)">Your account is <strong>85% safer</strong> than the average user. Complete 3 more lessons to reach Platinum status.</p>
+             </div>
+          </div>
+       </div>
+    </div>
+
+    <div class="hero-stats anim-up" style="animation-delay: 0.5s">
+       <div class="stat-card">
+          <div class="stat-val">₹2.4Cr</div>
+          <div class="stat-label">Fraud Blocked</div>
+       </div>
+       <div class="stat-card">
+          <div class="stat-val">98.2%</div>
+          <div class="stat-label">AI Accuracy</div>
+       </div>
+       <div class="stat-card">
+          <div class="stat-val">12k+</div>
+          <div class="stat-label">Safe Users</div>
+       </div>
+    </div>
+  </section>
+
+  <script>
+    window.addEventListener('scroll', () => {
+      const nav = document.getElementById('mainNav');
+      if (window.scrollY > 50) nav.classList.add('nav-scrolled');
+      else nav.classList.remove('nav-scrolled');
+    });
+  </script>
+</body>
+</html>
