@@ -1,13 +1,10 @@
 /* ====================================================
-   FraudShield – dashboard.js v3.3
-   All session reading happens inside the inline bootstrap
-   in dashboard.html. This file only exports helper functions.
+   FraudShield – dashboard.js v3.4 (Dynamic API)
    ==================================================== */
-
-const API_BASE = 'http://localhost:5001/api';
 
 // ── SVG icon shortcuts ──────────────────────────────────────────────
 const SVG_ICONS = {
+  shield:        `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 6.5v5.5C3 17.5 7 22 12 23c5-1 9-5.5 9-11V6.5L12 2z"/></svg>`,
   shieldAlert:  `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 6.5v5.5C3 17.5 7 22 12 23c5-1 9-5.5 9-11V6.5L12 2z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
   alertTriangle:`<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
   check:        `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>`,
@@ -21,7 +18,6 @@ function safeEl(id) { return document.getElementById(id); }
 // ── Score Ring & Labels ──────────────────────────────────────────────
 function updateScoreUI(score) {
   const s = Math.round(score);
-
   const scoreEl = safeEl('safetyScore');
   if (scoreEl) scoreEl.innerHTML = s + '<span class="score-max">/100</span>';
 
@@ -54,14 +50,18 @@ function updateScoreUI(score) {
 // ── Fetch Stats ──────────────────────────────────────────────────────
 async function fetchStats(userId) {
   try {
-    const res = await fetch(`${API_BASE}/user/stats?user_id=${userId}&cb=${Date.now()}`);
-    if (!res.ok) throw new Error(res.status);
+    const res = await fetch(`${window.FS_CONFIG.API_BASE}/user/stats?user_id=${userId}&cb=${Date.now()}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const d = await res.json();
 
     if (typeof animateCount === 'function') {
-      animateCount(safeEl('statSavedVal'),   d.moneySaved    || 0);
-      animateCount(safeEl('statTxnVal'),     d.txnsProtected || 0);
-      animateCount(safeEl('statBlockedVal'), d.scannedTotal  || 0);
+      if (safeEl('statSavedVal'))   animateCount(safeEl('statSavedVal'),   d.moneySaved    || 0);
+      if (safeEl('statTxnVal'))     animateCount(safeEl('statTxnVal'),     d.txnsProtected || 0);
+      if (safeEl('statBlockedVal')) animateCount(safeEl('statBlockedVal'), d.scannedTotal  || 0);
+    } else {
+      if (safeEl('statSavedVal'))   safeEl('statSavedVal').textContent   = d.moneySaved || 0;
+      if (safeEl('statTxnVal'))     safeEl('statTxnVal').textContent     = d.txnsProtected || 0;
+      if (safeEl('statBlockedVal')) safeEl('statBlockedVal').textContent = d.scannedTotal || 0;
     }
 
     updateScoreUI(d.safetyScore || 0);
@@ -75,7 +75,7 @@ async function fetchStats(userId) {
   } catch (err) {
     console.error('fetchStats error:', err);
     const level = safeEl('safetyLevel');
-    if (level) level.innerHTML = `<span style="color:var(--crimson-lt)">Backend Error — refresh page</span>`;
+    if (level) level.innerHTML = `<span style="color:var(--crimson-lt)">Backend Error — check connection</span>`;
   }
 }
 
@@ -83,7 +83,7 @@ async function fetchStats(userId) {
 function renderActivity(txns) {
   const list = safeEl('txnList');
   if (!list) return;
-  if (!txns.length) {
+  if (!txns || !txns.length) {
     list.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--t3);font-size:0.875rem">No transactions yet. Send money to see activity!</div>`;
     return;
   }
@@ -113,7 +113,7 @@ function renderActivity(txns) {
 
 async function fetchActivity(userId) {
   try {
-    const res  = await fetch(`${API_BASE}/transactions?user_id=${userId}&cb=${Date.now()}`);
+    const res  = await fetch(`${window.FS_CONFIG.API_BASE}/transactions?user_id=${userId}&cb=${Date.now()}`);
     const txns = await res.json();
     renderActivity(txns);
   } catch (err) { console.warn('fetchActivity:', err); }
@@ -123,12 +123,21 @@ async function fetchActivity(userId) {
 function renderAlerts(alerts) {
   const list = safeEl('alertList');
   if (!list) return;
-  if (!alerts.length) {
-    list.innerHTML = `<div style="text-align:center;padding:1rem;color:var(--t3);font-size:0.82rem">No risk alerts found.</div>`;
-    return;
-  }
   const ago = typeof timeAgo === 'function' ? timeAgo : s => s;
-  list.innerHTML = alerts.slice(0,5).map(a => `
+    if (!alerts || alerts.length === 0) {
+      list.innerHTML = `
+        <div style="padding: 2rem; text-align: center; color: var(--t3); opacity: 0.8;">
+          <div style="margin-bottom: 0.75rem; opacity: 0.3;">
+            ${SVG_ICONS.shield || ''}
+          </div>
+          <p style="font-size: 0.8rem; font-weight: 600;">System Secure</p>
+          <p style="font-size: 0.7rem;">No recent threats detected</p>
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = alerts.slice(0, 5).map(a => `
     <div class="alert-row ${a.type}" onclick="window.location='alerts.html'" style="cursor:pointer">
       <div class="alert-row-icon ai-${a.type}">${a.type==='critical'?SVG_ICONS.shieldAlert:SVG_ICONS.alertTriangle}</div>
       <div>
@@ -142,8 +151,18 @@ function renderAlerts(alerts) {
 
 async function fetchAlertsList(userId) {
   try {
-    const res    = await fetch(`${API_BASE}/alerts?user_id=${userId}&cb=${Date.now()}`);
+    const res    = await fetch(`${window.FS_CONFIG.API_BASE}/alerts?user_id=${userId}&cb=${Date.now()}`);
     const alerts = await res.json();
     renderAlerts(alerts);
-  } catch (err) { console.warn('fetchAlerts:', err); }
+  } catch (err) { console.warn('fetchAlertsList:', err); }
+}
+
+function startAutoRefresh(userId) {
+  if (!userId) return;
+  console.log('Dashboard: Auto-refresh started (8s interval)');
+  setInterval(() => {
+    fetchStats(userId);
+    fetchActivity(userId);
+    fetchAlertsList(userId);
+  }, 8000);
 }

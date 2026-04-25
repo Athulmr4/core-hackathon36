@@ -122,7 +122,7 @@ async function analyzeTxn(e) {
   }
 
   try {
-    const res = await fetch('http://localhost:5001/api/analyze', {
+    const res = await fetch(`${window.FS_CONFIG.API_BASE}/analyze`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ upi, amount, purpose })
@@ -198,7 +198,7 @@ async function cancelTransaction() {
   if (session) {
     try {
       // 1. Save the blocked transaction
-      await fetch('http://localhost:5001/api/transactions', {
+      await fetch(`${window.FS_CONFIG.API_BASE}/transactions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -210,7 +210,7 @@ async function cancelTransaction() {
         })
       });
       // 2. Create threat alert
-      await fetch('http://localhost:5001/api/alerts', {
+      await fetch(`${window.FS_CONFIG.API_BASE}/alerts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -321,13 +321,12 @@ async function proceedSafely({ upi, amount, recipientName }, withWarning = false
   }
 
   // Record to backend
-  const API_BASE = 'http://localhost:5001/api';
   const session = getSession();
   
   if (session) {
     try {
       const riskScore = currentAnalysis ? currentAnalysis.riskScore : 0;
-      const res = await fetch(`${API_BASE}/transactions`, {
+      const res = await fetch(`${window.FS_CONFIG.API_BASE}/transactions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

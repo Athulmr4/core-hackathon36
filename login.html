@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign In – FraudShield</title>
-  <meta name="description" content="Sign in to FraudShield to protect your UPI payments with AI-powered fraud detection.">
   <link rel="stylesheet" href="styles/main.css">
   <style>
     body {
@@ -28,8 +27,8 @@
     }
     @keyframes authIn { from{opacity:0;transform:translateY(30px) scale(0.96)} to{opacity:1;transform:none} }
     .logo-badge {
-      width: 56px; height: 56px; background: var(--g-brand); border-radius: 16px;
-      display: flex; align-items: center; justify-content: center;
+      width: 56px; height: 56px; background: linear-gradient(135deg,#7c3aed,#0d9488);
+      border-radius: 16px; display: flex; align-items: center; justify-content: center;
       margin: 0 auto 1.5rem; box-shadow: 0 10px 25px rgba(124,58,237,0.45);
     }
     .auth-tabs {
@@ -39,24 +38,24 @@
     .auth-tab {
       flex: 1; padding: 10px; border-radius: 9px; border: none; cursor: pointer;
       font-size: 0.875rem; font-weight: 700; transition: all 0.25s;
-      font-family: var(--fbody); color: var(--t3); background: transparent;
+      font-family: inherit; color: rgba(255,255,255,0.4); background: transparent;
     }
-    .auth-tab.active { background: var(--g-brand); color: #fff; box-shadow: 0 4px 15px rgba(124,58,237,0.35); }
-    .auth-title { font-family: var(--fhead); font-size: 1.75rem; font-weight: 800; text-align: center; margin-bottom: 0.4rem; letter-spacing: -0.02em; }
-    .auth-subtitle { color: var(--t3); text-align: center; margin-bottom: 2rem; font-size: 0.875rem; }
-    .form-label { display: block; font-size: 0.72rem; font-weight: 800; color: var(--t3); text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.08em; }
+    .auth-tab.active { background: linear-gradient(135deg,#7c3aed,#0d9488); color: #fff; box-shadow: 0 4px 15px rgba(124,58,237,0.35); }
+    .auth-title { font-size: 1.75rem; font-weight: 800; text-align: center; margin-bottom: 0.4rem; letter-spacing: -0.02em; color: #fff; }
+    .auth-subtitle { color: rgba(255,255,255,0.4); text-align: center; margin-bottom: 2rem; font-size: 0.875rem; }
+    .form-label { display: block; font-size: 0.72rem; font-weight: 800; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 0.08em; }
     .input-wrap { position: relative; margin-bottom: 1.25rem; }
     .auth-input {
       width: 100%; padding: 14px 16px; background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.09); border-radius: 12px;
       font-size: 0.95rem; color: #fff; transition: all 0.25s;
-      box-sizing: border-box; font-family: var(--fbody);
+      box-sizing: border-box; font-family: inherit;
     }
     .auth-input:focus { outline: none; border-color: rgba(124,58,237,0.5); background: rgba(124,58,237,0.05); }
     .btn-auth {
-      width: 100%; padding: 16px; background: var(--g-brand); border: none;
+      width: 100%; padding: 16px; background: linear-gradient(135deg,#7c3aed,#0d9488); border: none;
       border-radius: 14px; color: #fff; font-size: 0.975rem; font-weight: 800;
-      font-family: var(--fhead); cursor: pointer; transition: 0.25s; margin-top: 0.5rem;
+      cursor: pointer; transition: 0.25s; margin-top: 0.5rem;
       box-shadow: 0 12px 28px -5px rgba(124,58,237,0.45);
       display: flex; align-items: center; justify-content: center; gap: 8px;
     }
@@ -69,9 +68,15 @@
       margin-bottom: 1.25rem; display: none;
     }
     .err-box.show { display: block; }
-    .back-link { display: block; text-align: center; font-size: 0.82rem; color: var(--t3); text-decoration: none; margin-top: 1.25rem; }
-    .back-link:hover { color: var(--t1); }
-    /* Only the active panel is visible */
+    .ok-box {
+      padding: 12px 14px; background: rgba(16,185,129,0.08);
+      border: 1px solid rgba(16,185,129,0.2); border-radius: 10px;
+      color: #34d399; font-size: 0.82rem; font-weight: 600;
+      margin-bottom: 1.25rem; display: none;
+    }
+    .ok-box.show { display: block; }
+    .back-link { display: block; text-align: center; font-size: 0.82rem; color: rgba(255,255,255,0.4); text-decoration: none; margin-top: 1.25rem; }
+    .back-link:hover { color: #fff; }
     #panelLogin, #panelSignup { display: none; }
     #panelLogin.active, #panelSignup.active { display: block; }
     @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
@@ -81,176 +86,164 @@
 <body>
   <div class="auth-glow"></div>
   <div class="auth-container">
-
-    <!-- Logo -->
     <div class="logo-badge">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 2L3 6.5v5.5C3 17.5 7 22 12 23c5-1 9-5.5 9-11V6.5L12 2z"/>
         <polyline points="9,12 11,14 15,10"/>
       </svg>
     </div>
-
-    <!-- Tabs -->
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tabLogin"  onclick="switchTab('login')">Sign In</button>
-      <button class="auth-tab"        id="tabSignup" onclick="switchTab('signup')">Create Account</button>
+      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+      <button class="auth-tab" id="tabSignup" onclick="switchTab('signup')">Create Account</button>
     </div>
-
-    <!-- Error box (shared) -->
     <div class="err-box" id="errBox"></div>
+    <div class="ok-box" id="okBox"></div>
 
-    <!-- ── LOGIN PANEL ─────────────────────────────── -->
+    <!-- LOGIN -->
     <div id="panelLogin" class="active">
       <h1 class="auth-title">Welcome Back</h1>
       <p class="auth-subtitle">Sign in to your protected dashboard</p>
-      <form onsubmit="handleLogin(event)">
+      <form id="loginForm">
         <div class="input-wrap">
-          <label class="form-label">Email / Username</label>
-          <input type="text" id="loginEmail" class="auth-input" placeholder="you@example.com" required autocomplete="username">
+          <label class="form-label">Username</label>
+          <input type="text" id="loginEmail" class="auth-input" placeholder="dhanu@1234" required>
         </div>
         <div class="input-wrap">
           <label class="form-label">Password</label>
-          <input type="password" id="loginPassword" class="auth-input" placeholder="••••••••" required autocomplete="current-password">
+          <input type="password" id="loginPassword" class="auth-input" placeholder="••••••••" required>
         </div>
-        <button type="submit" class="btn-auth" id="loginBtn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10,17 15,12 10,7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-          Sign In
-        </button>
+        <button type="submit" class="btn-auth" id="loginBtn">Sign In</button>
       </form>
     </div>
 
-    <!-- ── SIGNUP PANEL ────────────────────────────── -->
+    <!-- SIGNUP -->
     <div id="panelSignup">
       <h1 class="auth-title">Create Account</h1>
       <p class="auth-subtitle">Your personal AI guard for UPI &amp; Payments</p>
-      <form onsubmit="handleSignup(event)">
+      <form id="signupForm">
         <div class="input-wrap">
           <label class="form-label">Full Name</label>
-          <input type="text" id="signupName" class="auth-input" placeholder="Rahul Kumar" required autocomplete="name">
+          <input type="text" id="signupName" class="auth-input" placeholder="Rahul Kumar" required>
         </div>
         <div class="input-wrap">
-          <label class="form-label">Email Address</label>
-          <input type="email" id="signupEmail" class="auth-input" placeholder="you@example.com" required autocomplete="email">
+          <label class="form-label">Email / Username</label>
+          <input type="text" id="signupEmail" class="auth-input" placeholder="you@example.com" required>
         </div>
         <div class="input-wrap">
           <label class="form-label">Create Password</label>
-          <input type="password" id="signupPassword" class="auth-input" placeholder="Min. 6 characters" required autocomplete="new-password">
+          <input type="password" id="signupPassword" class="auth-input" placeholder="Min. 4 characters" required>
         </div>
-        <button type="submit" class="btn-auth" id="signupBtn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-          Create My Account
-        </button>
+        <button type="submit" class="btn-auth" id="signupBtn">Create My Account</button>
       </form>
     </div>
-
     <a href="index.html" class="back-link">← Back to homepage</a>
   </div>
 
-  <script src="js/app.js"></script>
-  <script src="js/auth.js"></script>
+  <!-- NO external JS dependencies — 100% self-contained -->
   <script>
-    const API = 'http://localhost:5001/api';
+    var BACKEND = 'http://localhost:5001/api';
 
-    // Clean up any stale keys from old code versions
+    // Clean up stale keys
     localStorage.removeItem('fraudshield_user');
     localStorage.removeItem('fraudshield_users');
 
-    // Tab switcher
-    function switchTab(tab) {
-      document.getElementById('panelLogin').classList.toggle('active',  tab === 'login');
-      document.getElementById('panelSignup').classList.toggle('active', tab === 'signup');
-      document.getElementById('tabLogin').classList.toggle('active',    tab === 'login');
-      document.getElementById('tabSignup').classList.toggle('active',   tab === 'signup');
-      hideErr();
+    function switchTab(t) {
+      document.getElementById('panelLogin').className  = t === 'login' ? 'active' : '';
+      document.getElementById('panelSignup').className = t === 'signup' ? 'active' : '';
+      document.getElementById('tabLogin').className    = 'auth-tab' + (t === 'login' ? ' active' : '');
+      document.getElementById('tabSignup').className   = 'auth-tab' + (t === 'signup' ? ' active' : '');
+      document.getElementById('errBox').className = 'err-box';
+      document.getElementById('okBox').className  = 'ok-box';
     }
 
-    // Respect ?tab=signup from other pages
-    const p = new URLSearchParams(location.search);
-    if (p.get('tab') === 'signup') switchTab('signup');
+    function showErr(msg) { var b=document.getElementById('errBox'); b.textContent=msg; b.className='err-box show'; document.getElementById('okBox').className='ok-box'; }
+    function showOk(msg)  { var b=document.getElementById('okBox');  b.textContent=msg; b.className='ok-box show';  document.getElementById('errBox').className='err-box'; }
 
-    function showErr(msg) {
-      const b = document.getElementById('errBox');
-      b.textContent = msg; b.classList.add('show');
-    }
-    function hideErr() {
-      document.getElementById('errBox').classList.remove('show');
-    }
+    // ── LOGIN ──
+    document.getElementById('loginForm').onsubmit = function(e) {
+      e.preventDefault();
+      var email = document.getElementById('loginEmail').value.trim();
+      var pass  = document.getElementById('loginPassword').value;
+      if (!email || !pass) { showErr('Please fill in all fields.'); return; }
 
-    function setBusy(btnId, busy, defaultHTML) {
-      const btn = document.getElementById(btnId);
-      btn.disabled = busy;
-      btn.innerHTML = busy ? '<span class="spin"></span> Please wait…' : defaultHTML;
-    }
+      var btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin"></span> Signing in...';
 
-    // ── LOGIN ────────────────────────────────────────
-    async function handleLogin(e) {
-      e.preventDefault(); hideErr();
-      const email    = document.getElementById('loginEmail').value.trim();
-      const password = document.getElementById('loginPassword').value;
-      if (!email || !password) { showErr('Please fill in all fields.'); return; }
-
-      const loginHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10,17 15,12 10,7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Sign In`;
-      setBusy('loginBtn', true, loginHTML);
-
-      try {
-        const res  = await fetch(`${API}/auth/login`, {
-          method: 'POST', headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({ username: email, password })
-        });
-        const data = await res.json();
-        if (data.success) {
+      fetch(BACKEND + '/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: email, password: pass })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.success && data.user) {
           localStorage.setItem('fraudshield_session', JSON.stringify(data.user));
-          showToast(`Welcome back, ${data.user.fullName}!`, 'success');
-          setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
+          showOk('Welcome back, ' + data.user.fullName + '! Redirecting...');
+          setTimeout(function() { window.location.href = 'dashboard.html'; }, 800);
         } else {
-          showErr(data.detail || 'Invalid email or password.');
-          setBusy('loginBtn', false, loginHTML);
+          showErr(data.detail || 'Invalid username or password.');
+          btn.disabled = false;
+          btn.innerHTML = 'Sign In';
         }
-      } catch(err) {
-        showErr('Cannot reach server. Make sure the backend is running.');
-        setBusy('loginBtn', false, loginHTML);
-      }
-    }
+      })
+      .catch(function(err) {
+        console.error('Login error:', err);
+        showErr('Cannot reach server. Is the backend running on port 5001?');
+        btn.disabled = false;
+        btn.innerHTML = 'Sign In';
+      });
+    };
 
-    // ── SIGNUP ───────────────────────────────────────
-    async function handleSignup(e) {
-      e.preventDefault(); hideErr();
-      const fullName = document.getElementById('signupName').value.trim();
-      const email    = document.getElementById('signupEmail').value.trim();
-      const password = document.getElementById('signupPassword').value;
-      if (!fullName || !email || !password) { showErr('Please fill in all fields.'); return; }
-      if (password.length < 6) { showErr('Password must be at least 6 characters.'); return; }
+    // ── SIGNUP ──
+    document.getElementById('signupForm').onsubmit = function(e) {
+      e.preventDefault();
+      var name  = document.getElementById('signupName').value.trim();
+      var email = document.getElementById('signupEmail').value.trim();
+      var pass  = document.getElementById('signupPassword').value;
+      if (!name || !email || !pass) { showErr('Please fill in all fields.'); return; }
+      if (pass.length < 4) { showErr('Password must be at least 4 characters.'); return; }
 
-      const signupHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg> Create My Account`;
-      setBusy('signupBtn', true, signupHTML);
+      var btn = document.getElementById('signupBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spin"></span> Creating account...';
 
-      try {
-        const res  = await fetch(`${API}/auth/register`, {
-          method: 'POST', headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({ username: email, password, fullName })
-        });
-        const data = await res.json();
+      fetch(BACKEND + '/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: email, password: pass, fullName: name })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
         if (data.success) {
-          // Auto-login after signup
-          const loginRes  = await fetch(`${API}/auth/login`, {
-            method: 'POST', headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({ username: email, password })
+          // Auto-login
+          return fetch(BACKEND + '/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: email, password: pass })
+          }).then(function(r) { return r.json(); }).then(function(loginData) {
+            if (loginData.success) {
+              localStorage.setItem('fraudshield_session', JSON.stringify(loginData.user));
+            }
+            showOk('Account created! Redirecting to dashboard...');
+            setTimeout(function() { window.location.href = 'dashboard.html'; }, 800);
           });
-          const loginData = await loginRes.json();
-          if (loginData.success) {
-            localStorage.setItem('fraudshield_session', JSON.stringify(loginData.user));
-          }
-          showToast(`Account created! Welcome, ${fullName}!`, 'success');
-          setTimeout(() => { window.location.href = 'dashboard.html'; }, 700);
         } else {
-          showErr(data.detail || 'Registration failed. Try a different email.');
-          setBusy('signupBtn', false, signupHTML);
+          showErr(data.detail || 'Registration failed. Try a different username.');
+          btn.disabled = false;
+          btn.innerHTML = 'Create My Account';
         }
-      } catch(err) {
-        showErr('Cannot reach server. Make sure the backend is running.');
-        setBusy('signupBtn', false, signupHTML);
-      }
-    }
+      })
+      .catch(function(err) {
+        console.error('Signup error:', err);
+        showErr('Cannot reach server. Is the backend running on port 5001?');
+        btn.disabled = false;
+        btn.innerHTML = 'Create My Account';
+      });
+    };
+
+    // Handle ?tab=signup
+    if (new URLSearchParams(location.search).get('tab') === 'signup') switchTab('signup');
   </script>
 </body>
 </html>

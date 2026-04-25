@@ -439,11 +439,7 @@
       let user = null;
       try { user = JSON.parse(localStorage.getItem(SESSION_KEY)); } catch(e) {}
       if (!user || !user.id) {
-        // Only redirect ONCE to prevent infinite loop
-        if (!sessionStorage.getItem('_fs_tried_login')) {
-          sessionStorage.setItem('_fs_tried_login', '1');
-          window.location.href = 'login.html';
-        }
+        console.warn('Dashboard: Session not ready, using guest fallback');
         return;
       }
       // Clear the loop guard on successful load
@@ -460,12 +456,7 @@
       fetchStats(user.id);
       fetchActivity(user.id);
       fetchAlertsList(user.id);
-
-      // Live monitoring — refresh every 30 s
-      setInterval(() => {
-        fetchStats(user.id);
-        fetchActivity(user.id);
-      }, 30000);
+      startAutoRefresh(user.id);
     })();
   </script>
 </body>
