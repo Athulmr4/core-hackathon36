@@ -1,0 +1,213 @@
+/* ====================================================
+   FraudShield – checker.js  v2 (SVG icons, no emojis)
+   ==================================================== */
+
+let scanHistory = Store ? Store.get('urlChecks', []) : [];
+
+function onUrlInput() {
+  const val = document.getElementById('urlInput')?.value || '';
+  const clearBtn = document.getElementById('urlClearBtn');
+  if (clearBtn) clearBtn.style.display = val ? 'block' : 'none';
+}
+
+function clearUrl() {
+  const i = document.getElementById('urlInput');
+  if (i) { i.value = ''; i.focus(); }
+  onUrlInput();
+  document.getElementById('urlResult').innerHTML = '';
+}
+
+function startScan() {
+  const input = document.getElementById('urlInput');
+  if (!input || !input.value.trim()) {
+    showToast('Please paste a URL to scan', 'warning');
+    return;
+  }
+  const url = input.value.trim();
+  const scanBtn = document.getElementById('scanBtn');
+  const anim = document.getElementById('scanningAnim');
+  const result = document.getElementById('urlResult');
+
+  if (scanBtn) { scanBtn.disabled = true; scanBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg> Scanning…`; }
+  if (anim) anim.style.display = 'flex';
+  if (result) result.innerHTML = '';
+
+  const delay = 1800 + Math.random() * 800;
+  setTimeout(() => {
+    if (anim) anim.style.display = 'none';
+    if (scanBtn) {
+      scanBtn.disabled = false;
+      scanBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Scan Link`;
+    }
+
+    const analysis = FraudEngine ? FraudEngine.analyzeUrl(url) : simulateScan(url);
+    displayResult(url, analysis);
+    addToHistory(url, analysis);
+    renderHistory();
+  }, delay);
+}
+
+function simulateScan(url) {
+  const riskWords = ['secure-login', 'verify', 'update', 'prize', 'claim', 'win', 'lucky', 'reward', 'confirm-account'];
+  const badTLDs   = ['.tk', '.ml', '.cf', '.ga', '.xyz', '.gq'];
+  const goodTLDs  = ['.com', '.in', '.org', '.gov.in', '.co.in', '.net'];
+  const lower = url.toLowerCase();
+  let score = 0;
+  const flags = [];
+
+  if (riskWords.some(w => lower.includes(w))) { score += 35; flags.push('Contains high-risk keywords'); }
+  if (badTLDs.some(t => lower.includes(t)))   { score += 40; flags.push('Suspicious domain extension'); }
+  if (!lower.startsWith('https'))             { score += 20; flags.push('No HTTPS encryption'); }
+  if (lower.length > 60)                      { score += 10; flags.push('Unusually long URL'); }
+  if ((lower.match(/-/g)||[]).length > 3)     { score += 15; flags.push('Multiple hyphens in domain'); }
+
+  if (!goodTLDs.some(t => lower.includes(t))) score += 10;
+
+  return { score: Math.min(score, 100), flags, safe: score < 30 };
+}
+
+const CHECK_ICONS = {
+  https: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>`,
+  domain: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>`,
+  length: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18H5a2 2 0 01-2-2V8a2 2 0 012-2h4"/><polyline points="15,18 19,12 15,6"/><line x1="9" y1="12" x2="19" y2="12"/></svg>`,
+  keywords: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>`,
+  reputation: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 6.5v5.5C3 17.5 7 22 12 23c5-1 9-5.5 9-11V6.5L12 2z"/></svg>`,
+};
+
+function getChecks(url, analysis) {
+  const isHttps   = url.startsWith('https');
+  const badTLDs   = ['.tk', '.ml', '.cf', '.ga', '.xyz', '.gq'];
+  const riskWords = ['secure-login', 'verify', 'prize', 'claim', 'win', 'lucky'];
+  const hasBadTLD = badTLDs.some(t => url.toLowerCase().includes(t));
+  const hasRisk   = riskWords.some(w => url.toLowerCase().includes(w));
+  const isShort   = url.length <= 60;
+  const goodRep   = analysis.score < 30;
+  return [
+    { label:'HTTPS',       icon:'https',      val: isHttps   ? 'ok'   : 'bad',  text: isHttps   ? 'Encrypted'     : 'Not Secure',   desc:'Does the site use HTTPS encryption?' },
+    { label:'Domain',      icon:'domain',     val: hasBadTLD ? 'bad'  : 'ok',   text: hasBadTLD ? 'Suspicious TLD' : 'Looks Normal',  desc:'Is the domain extension reputable?' },
+    { label:'URL Length',  icon:'length',     val: isShort   ? 'ok'   : 'warn', text: isShort   ? 'Normal Length'  : 'Very Long',     desc:'Phishing URLs are often very long' },
+    { label:'Keywords',    icon:'keywords',   val: hasRisk   ? 'bad'  : 'ok',   text: hasRisk   ? 'Risk Keywords'  : 'No Red Words',  desc:'Does the URL contain scam-related words?' },
+    { label:'Reputation',  icon:'reputation', val: goodRep   ? 'ok'   : 'bad',  text: goodRep   ? 'No Reports'     : 'Reported',      desc:'Any known fraud reports for this URL?' },
+  ];
+}
+
+function displayResult(url, analysis) {
+  const container = document.getElementById('urlResult');
+  if (!container) return;
+
+  let level, verdictText, verdictColor;
+  if (analysis.score < 30) {
+    level = 'safe'; verdictText = 'Link Appears Safe'; verdictColor = 'var(--emerald-lt)';
+    showToast('Link scan complete — appears safe', 'success');
+  } else if (analysis.score < 60) {
+    level = 'warning'; verdictText = 'Proceed with Caution'; verdictColor = 'var(--amber-lt)';
+    showToast('Caution: Suspicious link detected', 'warning');
+  } else {
+    level = 'danger'; verdictText = 'High Risk — Do Not Click!'; verdictColor = 'var(--crimson-lt)';
+    showToast('DANGER: Phishing link detected!', 'danger', 5001);
+  }
+
+  const iconSvg = level === 'safe'
+    ? `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>`
+    : level === 'warning'
+    ? `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+    : `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+
+  const iconCls = `vi-${level}`;
+  const checks  = getChecks(url, analysis);
+
+  const checkHtml = checks.map(c => `
+    <div class="check-item">
+      <div class="check-item-label">${c.label}</div>
+      <div class="check-item-val cv-${c.val}">
+        ${CHECK_ICONS[c.icon]}
+        ${c.text}
+      </div>
+      <div class="check-item-desc">${c.desc}</div>
+    </div>
+  `).join('');
+
+  const flagsHtml = analysis.flags && analysis.flags.length
+    ? analysis.flags.map(f => `
+        <div class="rf-item rf-bad">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          ${typeof f === 'string' ? f : f.desc}
+        </div>
+      `).join('')
+    : '';
+
+  container.innerHTML = `
+    <div class="result-box ${level}" style="display:block">
+      <div class="result-verdict-row">
+        <div class="verdict-icon ${iconCls}">${iconSvg}</div>
+        <div>
+          <div class="verdict-title" style="color:${verdictColor}">${verdictText}</div>
+          <div class="verdict-url">${url}</div>
+        </div>
+        <div style="margin-left:auto;font-family:var(--fmono);font-size:0.82rem;font-weight:800;padding:8px 14px;border-radius:8px;background:rgba(255,255,255,0.05)">
+          Risk Score<br/><span style="font-size:1.4rem;color:${verdictColor}">${analysis.score}</span>/100
+        </div>
+      </div>
+      <div class="check-grid">${checkHtml}</div>
+      ${flagsHtml ? `<div style="margin-top:1.25rem"><div class="risk-label-title" style="margin-bottom:0.75rem">Flags Detected</div>${flagsHtml}</div>` : ''}
+    </div>
+  `;
+}
+
+function addToHistory(url, analysis) {
+  const item = { url, score: analysis.score, time: new Date().toISOString() };
+  if (Store) Store.push('urlChecks', item);
+  scanHistory.unshift(item);
+  if (scanHistory.length > 20) scanHistory.pop();
+}
+
+const STATUS_ICON = {
+  ok:   `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>`,
+  warn: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>`,
+  bad:  `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+};
+
+function renderHistory() {
+  const list = document.getElementById('recentChecksList');
+  if (!list) return;
+  const history = Store ? Store.get('urlChecks', []) : scanHistory;
+  if (!history.length) {
+    list.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--t3);font-size:0.85rem">No URLs checked yet. Paste one above!</div>`;
+    return;
+  }
+  list.innerHTML = history.slice(0, 10).map((h, i) => {
+    const level = h.score < 30 ? 'ok' : h.score < 60 ? 'warn' : 'bad';
+    const color  = level === 'ok' ? 'var(--emerald-lt)' : level === 'warn' ? 'var(--amber-lt)' : 'var(--crimson-lt)';
+    const bg     = level === 'ok' ? 'si-emerald' : level === 'warn' ? 'si-amber' : 'si-crimson';
+    return `
+      <div class="recent-item" id="ri_${i}" onclick="rescan('${h.url.replace(/'/g, "\\'")}')">
+        <div class="ri-icon ${bg}">${STATUS_ICON[level]}</div>
+        <div class="ri-url">${h.url}</div>
+        <div class="ri-status" style="background:${color}18;color:${color};border:1px solid ${color}33;padding:2px 8px;border-radius:99px;font-size:0.65rem;font-weight:700">
+          ${h.score}/100
+        </div>
+        <div class="ri-time">${timeAgo(new Date(h.time))}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function rescan(url) {
+  const inp = document.getElementById('urlInput');
+  if (inp) { inp.value = url; onUrlInput(); }
+  startScan();
+}
+
+function clearHistory() {
+  if (Store) Store.set('urlChecks', []);
+  scanHistory = [];
+  renderHistory();
+  showToast('History cleared', 'info');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderHistory();
+  document.getElementById('urlInput')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') startScan();
+  });
+});
