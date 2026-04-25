@@ -236,11 +236,17 @@
     <div class="success-icon-wrap">
       <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>
     </div>
-    <h2>Transfer Successful</h2>
-    <p id="successDetails" style="color:var(--t2);margin:0.5rem 0 1.5rem;font-size:0.9rem"></p>
-    <button onclick="closeModal('successModal')" class="btn btn-primary" style="width:100%">Back to Dashboard</button>
+    <h2 style="margin-bottom:0.25rem">Transaction Verified</h2>
+    <p style="font-size:0.78rem;color:var(--emerald-lt);margin-bottom:1rem;font-weight:600">✓ FraudShield analysis complete — Safe to pay</p>
+    <div id="successDetails" style="color:var(--t2);margin:0 0 1.25rem;font-size:0.9rem"></div>
+    <button onclick="openUpiApp(window._lastUpiLink)" class="btn btn-primary" style="width:100%;padding:14px;font-size:0.95rem;gap:10px">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9 22,2"/></svg>
+      Pay via UPI App
+    </button>
+    <button onclick="closeModal('successModal'); window.location.href='dashboard.html'" class="btn btn-secondary" style="width:100%;margin-top:0.625rem;font-size:0.82rem;color:var(--t3)">Back to Dashboard</button>
   </div>
 </div>
+
 
 <script src="js/app.js"></script>
 <script src="js/icons.js"></script>

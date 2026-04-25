@@ -193,14 +193,73 @@ function proceedAnyway() {
   proceedSafely({ upi, amount, recipientName: name }, true);
 }
 
+// ---- Build UPI Deep Link ----
+function buildUpiLink({ upi, amount, recipientName, purpose }) {
+  // NOTE: We do NOT use URLSearchParams because it encodes '@' as '%40'
+  // and spaces as '+', which many UPI apps reject.
+  const name = (recipientName || 'Recipient').replace(/&/g, 'and').replace(/[#?=%]/g, '');
+  const amt = Number(amount);
+  // Use integer if whole number, otherwise 2 decimal places
+  const amtStr = amt % 1 === 0 ? amt.toString() : amt.toFixed(2);
+
+  // Keep transaction note simple — avoid special characters
+  const note = 'Payment via FraudShield';
+
+  // Build manually — only essential params (pa, pn, am, cu)
+  // Do NOT include 'mode' — it can restrict payment on some apps
+  return `upi://pay?pa=${upi}&pn=${encodeURIComponent(name)}&am=${amtStr}&cu=INR&tn=${encodeURIComponent(note)}`;
+}
+
+
+
+// ---- Open UPI App ----
+function openUpiApp(upiLink) {
+  // Try to open the UPI intent link
+  const isAndroid = /android/i.test(navigator.userAgent);
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isMobile = isAndroid || isIOS || /mobile/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    window.location.href = upiLink;
+  } else {
+    // On desktop, show a helpful message
+    showToast('UPI payment links work on mobile devices. Open this page on your phone to pay via UPI app.', 'info', 5000);
+  }
+}
+
 // ---- Proceed Safely ----
 function proceedSafely({ upi, amount, recipientName }, withWarning = false) {
-  const successDetails = document.getElementById('successDetails');
   const name = recipientName || upi;
+  const purpose = document.getElementById('txnPurpose')?.value || '';
+
+  // Build UPI deep link
+  const upiLink = buildUpiLink({ upi, amount, recipientName: name, purpose });
+
+  // Store the link globally so the modal button can access it
+  window._lastUpiLink = upiLink;
+
+  // Update success modal content
+  const successDetails = document.getElementById('successDetails');
   if (successDetails) {
-    successDetails.textContent = `${formatCurrency(amount)} sent to ${name}`;
+    successDetails.innerHTML = `
+      <div style="text-align:left;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:var(--r-md);padding:1rem;margin-bottom:0.5rem">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:0.75rem;color:var(--t3)">To</span>
+          <span style="font-size:0.85rem;font-weight:700;color:var(--t1)">${name}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="font-size:0.75rem;color:var(--t3)">UPI ID</span>
+          <span style="font-size:0.82rem;font-weight:600;color:var(--violet-lt);font-family:var(--fmono)">${upi}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <span style="font-size:0.75rem;color:var(--t3)">Amount</span>
+          <span style="font-size:1rem;font-weight:800;color:var(--emerald-lt)">${formatCurrency(amount)}</span>
+        </div>
+      </div>
+    `;
   }
 
+  // Record transaction
   const txn = {
     id: genId('TXN'),
     name: name,
@@ -217,13 +276,13 @@ function proceedSafely({ upi, amount, recipientName }, withWarning = false) {
   FraudEngine.addKnownPayee(upi);
 
   const refId = txn.id;
-  showToast(`Transaction ${refId} of ${formatCurrency(amount)} processed.`, withWarning ? 'warning' : 'success');
+  showToast(`Transaction ${refId} verified — opening UPI app...`, withWarning ? 'warning' : 'success');
   openModal('successModal');
 
+  // Auto-open UPI app after a short delay
   setTimeout(() => {
-    closeModal('successModal');
-    window.location.href = 'dashboard.html'; // Redirect to see updated dashboard
-  }, 3000);
+    openUpiApp(upiLink);
+  }, 800);
 }
 
 // ---- Reset Form ----
